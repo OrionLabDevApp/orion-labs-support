@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orion Labs | Interactive Constellation</title>
+    <meta name="description" content="Discover Orion Labs applications through an interactive stellar constellation. Click on stars to explore our universe of premium apps.">
+
+    <!-- Google Fonts for space-themed typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Exo+2:wght@200;300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(ellipse at center, #1a1329 0%, #0a0a0a 70%);
+            color: #e8e2f0;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* Navigation fixe en haut */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(177, 156, 217, 0.2);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #b19cd9;
+            text-shadow: 0 0 15px rgba(177, 156, 217, 0.4);
+            font-family: 'Orbitron', 'Rajdhani', 'Exo 2', 'Segoe UI', sans-serif;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #e8e2f0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-family: 'Orbitron', 'Rajdhani', 'Exo 2', 'Segoe UI', sans-serif;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .nav-links a:hover {
+            background: rgba(177, 156, 217, 0.1);
+            color: #b19cd9;
+        }
+
+        /* Constellation Container */
+        .constellation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Starfield Background */
+        .starfield {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .background-star {
+            position: absolute;
+            background: #e8e2f0;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* Interactive Constellation Stars */
+        .constellation-star {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #b19cd9 0%, #9a7bb8 50%, #6a4c93 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.4s ease;
+            box-shadow:
+                0 0 20px rgba(177, 156, 217, 0.6),
+                0 0 40px rgba(177, 156, 217, 0.3),
+                0 0 60px rgba(177, 156, 217, 0.1);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .constellation-star:hover {
+            transform: scale(1.5);
+            box-shadow:
+                0 0 30px rgba(177, 156, 217, 0.8),
+                0 0 60px rgba(177, 156, 217, 0.5),
+                0 0 90px rgba(177, 156, 217, 0.2);
+        }
+
+        .constellation-star.active {
+            transform: scale(1.8);
+            background: radial-gradient(circle, #ffffff 0%, #b19cd9 50%, #9a7bb8 100%);
+            box-shadow:
+                0 0 40px rgba(255, 255, 255, 0.8),
+                0 0 80px rgba(177, 156, 217, 0.6),
+                0 0 120px rgba(177, 156, 217, 0.3);
+        }
+
+
+        /* App Modal */
+        .app-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .app-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1329 0%, #2a1a3d 100%);
+            border: 2px solid rgba(177, 156, 217, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.8) translateY(50px);
+            transition: all 0.4s ease;
+            box-shadow: 0 20px 60px rgba(177, 156, 217, 0.2);
+        }
+
+        .app-modal.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: #b19cd9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+            transform: scale(1.2);
+        }
+
+        .app-icon-large {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(177, 156, 217, 0.3);
+        }
+
+        .app-icon-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(177, 156, 217, 0.3);
+        }
+
+        .app-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            text-align: center;
+        }
+
+        .app-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .app-features li {
+            padding: 0.5rem 0;
+            color: #d1c7e0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .app-features li::before {
+            content: "★";
+            position: absolute;
+            left: 0;
+            color: #b19cd9;
+            animation: sparkle 2s infinite ease-in-out;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .app-status {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(177, 156, 217, 0.1);
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .status-available {
+            color: #b19cd9;
+            font-weight: bold;
+        }
+
+        .status-coming-soon {
+            color: #9a7bb8;
+            font-weight: bold;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1329 0%, #0a0a0a 70%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            transition: all 2s cubic-bezier(0.19, 1, 0.22, 1);
+            overflow: hidden;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            transform: scale(1.5) rotate(5deg);
+            filter: blur(10px);
+            pointer-events: none;
+        }
+
+        .orion-logo {
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            color: #ffffff;
+            text-shadow: 0 0 40px rgba(177, 156, 217, 0.6);
+            animation: logoGlow 3s ease-in-out infinite alternate;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+        }
+
+        @keyframes logoGlow {
+            0% {
+                text-shadow: 0 0 40px rgba(177, 156, 217, 0.6);
+                transform: scale(1);
+            }
+            100% {
+                text-shadow:
+                    0 0 60px rgba(177, 156, 217, 0.8),
+                    0 0 100px rgba(177, 156, 217, 0.4);
+                transform: scale(1.05);
+            }
+        }
+
+        .welcome-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            color: #d1c7e0;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Welcome Stars Background */
+        .welcome-stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .welcome-star {
+            position: absolute;
+            background: #e8e2f0;
+            border-radius: 50%;
+            animation: welcomeTwinkle 4s infinite ease-in-out;
+        }
+
+        @keyframes welcomeTwinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+        }
+
+
+        /* Interactive Enter Portal */
+        .enter-portal {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            transition: all 0.6s ease;
+            z-index: 10;
+        }
+
+        .portal-ring {
+            position: absolute;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            animation: portalRotate 8s linear infinite;
+        }
+
+        .portal-ring:nth-child(1) {
+            width: 200px;
+            height: 200px;
+            border-top: 2px solid rgba(177, 156, 217, 0.8);
+            border-right: 2px solid rgba(177, 156, 217, 0.4);
+            animation-duration: 8s;
+        }
+
+        .portal-ring:nth-child(2) {
+            width: 160px;
+            height: 160px;
+            border-bottom: 2px solid rgba(154, 123, 184, 0.6);
+            border-left: 2px solid rgba(154, 123, 184, 0.3);
+            animation-duration: 6s;
+            animation-direction: reverse;
+        }
+
+        .portal-ring:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            border-top: 2px solid rgba(106, 76, 147, 0.5);
+            border-right: 2px solid rgba(106, 76, 147, 0.2);
+            animation-duration: 4s;
+        }
+
+        @keyframes portalRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .portal-center {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(177, 156, 217, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s ease;
+        }
+
+        .portal-text {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-align: center;
+            line-height: 1.2;
+            text-shadow: 0 0 10px rgba(177, 156, 217, 0.5);
+        }
+
+        .enter-portal:hover {
+            transform: scale(1.1);
+        }
+
+        .enter-portal:hover .portal-ring {
+            border-color: rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 0 30px rgba(177, 156, 217, 0.4);
+        }
+
+        .enter-portal:hover .portal-center {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(177, 156, 217, 0.3) 70%);
+            box-shadow:
+                0 0 40px rgba(177, 156, 217, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .enter-portal:hover .portal-text {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Portal activation animation */
+        .enter-portal.activating {
+            animation: portalActivate 1s ease-out forwards;
+        }
+
+        @keyframes portalActivate {
+            0% { transform: scale(1.1); }
+            50% {
+                transform: scale(1.3);
+                filter: brightness(2);
+            }
+            100% {
+                transform: scale(10);
+                opacity: 0;
+            }
+        }
+
+        /* Constellation State */
+        .constellation-container {
+            opacity: 0;
+            transform: scale(0.7) rotate(-3deg);
+            filter: blur(5px);
+            transition: all 2.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .constellation-container.active {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            filter: blur(0px);
+        }
+
+        /* Guide Message */
+        .guide-message {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            animation: fadeInGuide 2s ease-out 2s forwards;
+        }
+
+        @keyframes fadeInGuide {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .guide-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(177, 156, 217, 0.4);
+        }
+
+        .guide-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            color: #d1c7e0;
+        }
+
+        /* Contact Modal - Thème spatial premium */
+        .contact-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s ease;
+        }
+
+        .contact-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .contact-form {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1329 50%, #2a1a3d 100%);
+            border: 2px solid rgba(177, 156, 217, 0.4);
+            border-radius: 25px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                0 0 50px rgba(177, 156, 217, 0.3),
+                inset 0 0 50px rgba(177, 156, 217, 0.05);
+        }
+
+        .contact-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(177, 156, 217, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(154, 123, 184, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            color: #ffffff;
+            font-family: 'Orbitron', 'Rajdhani', 'Exo 2', sans-serif;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(177, 156, 217, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: #b19cd9;
+            font-weight: 500;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(177, 156, 217, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: 'Exo 2', sans-serif;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: #1a1329;
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #b19cd9;
+            background: rgba(177, 156, 217, 0.1);
+            box-shadow:
+                0 0 20px rgba(177, 156, 217, 0.4),
+                inset 0 0 10px rgba(177, 156, 217, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(177, 156, 217, 0.7);
+            font-style: italic;
+        }
+
+        .submit-button {
+            background: linear-gradient(45deg, #4a2c5a 0%, #6a4c93 50%, #8e5bb8 100%);
+            color: #ffffff;
+            padding: 1.2rem 2.5rem;
+            border: 2px solid rgba(177, 156, 217, 0.5);
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 15px 35px rgba(74, 44, 90, 0.6),
+                0 0 30px rgba(177, 156, 217, 0.5);
+            background: linear-gradient(45deg, #6a4c93 0%, #8e5bb8 50%, #b19cd9 100%);
+            border-color: #b19cd9;
+        }
+
+        .submit-button:hover::before {
+            left: 100%;
+        }
+
+        .submit-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .orion-logo {
+                font-size: 3rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 1.1rem;
+                padding: 0 1rem;
+            }
+
+            .enter-portal {
+                width: 150px;
+                height: 150px;
+            }
+
+            .portal-ring:nth-child(1) {
+                width: 150px;
+                height: 150px;
+            }
+
+            .portal-ring:nth-child(2) {
+                width: 120px;
+                height: 120px;
+            }
+
+            .portal-ring:nth-child(3) {
+                width: 90px;
+                height: 90px;
+            }
+
+            .portal-center {
+                width: 60px;
+                height: 60px;
+            }
+
+            .portal-text {
+                font-size: 0.7rem;
+            }
+
+            .navbar {
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                margin-top: 0.3rem;
+            }
+
+            .nav-links a {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                padding: 2rem;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .constellation-star {
+                width: 25px;
+                height: 25px;
+            }
+
+            .guide-title {
+                font-size: 1.5rem;
+            }
+
+            .guide-subtitle {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">ORION LABS</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="showContact()">Contact</a></li>
+            <li><a href="mailto:orionlab.apps@outlook.fr">Support</a></li>
+        </ul>
+    </nav>
+
+    <!-- Welcome Screen -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <!-- Welcome Stars Background -->
+        <div class="welcome-stars" id="welcomeStars"></div>
+
+        <h1 class="orion-logo">ORION LABS</h1>
+        <p class="welcome-subtitle">
+            Welcome to the Orion constellation.<br>
+            Discover our premium applications through an interactive stellar experience.
+        </p>
+
+        <!-- Interactive Portal -->
+        <div class="enter-portal" id="enterPortal" onclick="activatePortal()">
+            <div class="portal-ring"></div>
+            <div class="portal-ring"></div>
+            <div class="portal-ring"></div>
+            <div class="portal-center">
+                <div class="portal-text">Enter<br>Orion</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Constellation Container -->
+    <div class="constellation-container" id="constellationContainer">
+        <!-- Background Starfield -->
+        <div class="starfield" id="starfield"></div>
+
+        <!-- Guide Message -->
+        <div class="guide-message">
+            <h2 class="guide-title">Navigate the Stars</h2>
+            <p class="guide-subtitle">Click on the bright stars to explore our applications</p>
+        </div>
+
+        <!-- Interactive Constellation -->
+        <div class="constellation-star" id="blackjack-star"
+             style="top: 45%; left: 35%;"
+             onclick="showApp('blackjack')"></div>
+
+        <div class="constellation-star" id="coming-soon-star"
+             style="top: 60%; left: 65%;"
+             onclick="showApp('coming-soon')"></div>
+
+    </div>
+
+    <!-- App Modals -->
+    <div class="app-modal" id="blackjack-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="app-icon-large">
+                <img src="./Logo_BJ_3.png" alt="Blackjack Master Pro">
+            </div>
+            <h2 class="app-title">Blackjack Master Pro</h2>
+            <p class="app-description">
+                Master professional blackjack with advanced card counting systems and real-time strategy recommendations.
+            </p>
+            <ul class="app-features">
+                <li>Omega II, Wong Halves & Zen Count systems</li>
+                <li>Real-time True Count calculations</li>
+                <li>Kelly Criterion betting strategies</li>
+                <li>Progressive training modules</li>
+                <li>Professional-grade simulation</li>
+                <li>Offline functionality</li>
+            </ul>
+            <div class="app-status">
+                <span class="status-available">Available on iOS & Android</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-modal" id="coming-soon-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="app-icon-large" style="background: linear-gradient(45deg, #4a2c5a, #6a4c93); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold;">
+                ?
+            </div>
+            <h2 class="app-title">Next Constellation</h2>
+            <p class="app-description">
+                A revolutionary new application is being forged in the stellar depths. Stay tuned for another innovative addition to the Orion Labs universe.
+            </p>
+            <ul class="app-features">
+                <li>Cutting-edge technology</li>
+                <li>Revolutionary features</li>
+                <li>Professional-grade quality</li>
+                <li>Cross-platform compatibility</li>
+                <li>Premium user experience</li>
+                <li>Advanced AI integration</li>
+            </ul>
+            <div class="app-status">
+                <span class="status-coming-soon">In Development - Coming Soon</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal" id="contact-modal">
+        <div class="contact-form">
+            <button class="close-modal" onclick="closeContact()" style="position: absolute; top: 1.5rem; right: 2rem; z-index: 10;">&times;</button>
+
+            <h2 class="form-title">Mission Control</h2>
+
+            <form action="mailto:orionlab.apps@outlook.fr" method="post" enctype="text/plain">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your name...">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="app">Mission Sector</label>
+                    <select id="app" name="app" required>
+                        <option value="">Select mission sector...</option>
+                        <option value="Blackjack Master Pro">Blackjack Master Pro</option>
+                        <option value="General">General Operations</option>
+                        <option value="Technical">Technical Support</option>
+                        <option value="Other">Other Operations</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Transmission Content</label>
+                    <textarea id="message" name="message" rows="5" required placeholder="Transmit your message to Orion Labs mission control..."></textarea>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    Launch Transmission
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Create welcome screen stars
+        function createWelcomeStars() {
+            const welcomeStars = document.getElementById('welcomeStars');
+            const numStars = 80;
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'welcome-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                welcomeStars.appendChild(star);
+            }
+        }
+
+        // Create constellation background starfield
+        function createConstellationStarfield() {
+            const starfield = document.getElementById('starfield');
+            const numStars = 200;
+
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'background-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 2 + 0.5 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starfield.appendChild(star);
+            }
+        }
+
+        // Portal activation with dramatic effect
+        function activatePortal() {
+            const portal = document.getElementById('enterPortal');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const constellationContainer = document.getElementById('constellationContainer');
+
+            // Prevent multiple clicks
+            portal.style.pointerEvents = 'none';
+
+            // Activate portal animation
+            portal.classList.add('activating');
+
+            // Hide welcome screen after portal animation starts
+            setTimeout(() => {
+                welcomeScreen.classList.add('hidden');
+            }, 800);
+
+            // Show constellation after welcome screen hides
+            setTimeout(() => {
+                constellationContainer.classList.add('active');
+                document.body.style.cursor = 'crosshair';
+
+            }, 1500);
+        }
+
+        // Legacy function for keyboard support
+        function enterConstellation() {
+            activatePortal();
+        }
+
+
+        // Show app modal
+        function showApp(appType) {
+            const modal = document.getElementById(appType + '-modal');
+            const guideMessage = document.querySelector('.guide-message');
+            const star = document.getElementById(appType + '-star');
+
+            // Hide guide message
+            if (guideMessage) {
+                guideMessage.style.opacity = '0';
+            }
+
+            // Activate star
+            star.classList.add('active');
+
+            // Show modal
+            modal.classList.add('active');
+
+            // Change cursor
+            document.body.style.cursor = 'default';
+        }
+
+        // Close modal
+        function closeModal() {
+            const modals = document.querySelectorAll('.app-modal');
+            const guideMessage = document.querySelector('.guide-message');
+            const stars = document.querySelectorAll('.constellation-star');
+
+            modals.forEach(modal => {
+                modal.classList.remove('active');
+            });
+
+            // Show guide message again
+            if (guideMessage) {
+                guideMessage.style.opacity = '1';
+            }
+
+            // Deactivate stars
+            stars.forEach(star => {
+                star.classList.remove('active');
+            });
+
+            // Change cursor back
+            document.body.style.cursor = 'crosshair';
+        }
+
+        // Show contact modal
+        function showContact() {
+            const modal = document.getElementById('contact-modal');
+            modal.classList.add('active');
+        }
+
+        // Close contact modal
+        function closeContact() {
+            const modal = document.getElementById('contact-modal');
+            modal.classList.remove('active');
+        }
+
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create both star backgrounds
+            createWelcomeStars();
+            createConstellationStarfield();
+
+            // Set initial cursor
+            document.body.style.cursor = 'default';
+
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('app-modal')) {
+                    closeModal();
+                }
+                if (e.target.classList.contains('contact-modal')) {
+                    closeContact();
+                }
+            });
+
+            // ESC key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    closeContact();
+                }
+            });
+
+            // Enter key to start constellation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !document.getElementById('welcomeScreen').classList.contains('hidden')) {
+                    activatePortal();
+                }
+            });
+        });
+
+        // Parallax effect for constellation stars (only when constellation is active)
+        document.addEventListener('mousemove', function(e) {
+            const constellationContainer = document.getElementById('constellationContainer');
+
+            // Only apply parallax if constellation is active
+            if (!constellationContainer.classList.contains('active')) return;
+
+            const stars = document.querySelectorAll('.constellation-star');
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            stars.forEach((star, index) => {
+                const speed = (index + 1) * 0.5;
+                const x = (mouseX - 0.5) * speed;
+                const y = (mouseY - 0.5) * speed;
+                star.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
